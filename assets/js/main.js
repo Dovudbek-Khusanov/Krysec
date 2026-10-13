@@ -31,7 +31,6 @@ grid.innerHTML = COURSES.map((c, i) => {
     <p>${c.desc}</p>
     <div class="course__foot">
       <span class="lvl" title="${LVL[c.lvl]}">${[1, 2, 3].map(n => `<i class="${n <= c.lvl ? 'on' : ''}"></i>`).join('')}<b>${LVL[c.lvl]}</b></span>
-      <a href="#register" class="course__go" data-course="${c.id}" aria-label="${c.title} kursiga yozilish"><span>Yozilish</span><svg><use href="#i-arrow"/></svg></a>
     </div>
   </article>`;
 }).join('');
@@ -87,6 +86,7 @@ $$('.cert__img').forEach(box => {
 
 const contactHTML = () => `
   <li><a href="${CONFIG.telegramUrl}" target="_blank" rel="noopener"><svg><use href="#i-tg"/></svg><span>${CONFIG.telegram}<small>Telegram</small></span></a></li>
+  <li><a href="${CONFIG.instagramUrl}" target="_blank" rel="noopener"><svg><use href="#i-ig"/></svg><span>${CONFIG.instagram}<small>Instagram</small></span></a></li>
   <li><a href="tel:${CONFIG.phone.replace(/[^\d+]/g, '')}"><svg><use href="#i-call"/></svg><span>${CONFIG.phone}<small>Qo‘ng‘iroq qiling</small></span></a></li>
   ${CONFIG.address ? `<li><span><svg><use href="#i-pin"/></svg><span>${CONFIG.address}${CONFIG.landmark ? `<small>Mo‘ljal: ${CONFIG.landmark}</small>` : '<small>Manzil</small>'}</span></span></li>` : ''}`;
 $('#contactsFoot').innerHTML = contactHTML();
@@ -161,9 +161,13 @@ const PRESETS = {
 const AUX = { top: 0, about: .1, courses: .2, roadmap: .4, mentor: .55, register: .85 };
 const BASE_RATE = scene.rate;
 const sections = $$('[data-globe]');
-function presetFor(id) {
+// p: 0 = globus joyida, 1 = butunlay pastga cho'kkan. Scroll bilan silliq o'zgaradi.
+let sinkP = 0;
+function presetFor(id, p = sinkP) {
   const set = PRESETS[innerWidth < 900 ? 'mobile' : 'desktop'];
-  return { ...(id === 'top' ? set.top : set.away), aux: AUX[id] ?? 0 };
+  const e = p * p * (3 - 2 * p); // smoothstep
+  const vy = (set.top.vy || 0) + ((set.away.vy || 0) - (set.top.vy || 0)) * e;
+  return { ...set.top, vy, aux: AUX[id] ?? 0 };
 }
 
 function onScroll() {
@@ -172,17 +176,21 @@ function onScroll() {
   $('#progress').style.transform = `scaleX(${max > 0 ? y / max : 0})`;
   body.classList.toggle('is-scrolled', y > 30);
 
+  // globus hero bo'ylab asta-sekin pastga cho'kadi
+  const heroH = sections[0].offsetHeight;
+  sinkP = Math.min(Math.max(y / (heroH * .9), 0), 1);
+  scene.rate = BASE_RATE * Math.max(0, 1 - sinkP * 1.4);
+
   let cur = sections[0];
   for (const s of sections) { if (s.getBoundingClientRect().top <= h * .5) cur = s; }
   const id = cur.id;
   if (id !== activeSec) {
     activeSec = id;
-    scene.setPreset(presetFor(id));
-    scene.rate = id === 'top' ? BASE_RATE : 0;
     $$('[data-nav]').forEach(a => a.classList.toggle('is-active', a.dataset.nav === id));
     $$('[data-dot]').forEach(a => a.classList.toggle('is-on', a.dataset.dot === id));
     if (id !== 'top') tag.classList.remove('is-on');
   }
+  scene.setPreset(presetFor(id));
   updateRoad();
 }
 addEventListener('scroll', onScroll, { passive: true });
@@ -223,7 +231,6 @@ const io = new IntersectionObserver(entries => {
     e.target.classList.add('in');
     io.unobserve(e.target);
     if (e.target.id === 'certs') startCerts();
-    if (e.target.classList.contains('terminal')) typeTerminal();
     if (e.target.classList.contains('register__grid')) {
       $('#enroll').classList.add('in');
       const t = $('.face.is-on .enroll__title');
@@ -231,7 +238,7 @@ const io = new IntersectionObserver(entries => {
     }
   }
 }, { threshold: .15, rootMargin: '0px 0px -8% 0px' });
-$$('.z3, [data-split], .course, #certs, .register__grid, .terminal').forEach(el => io.observe(el));
+$$('.z3, [data-split], .course, #certs, .register__grid').forEach(el => io.observe(el));
 $$('.feat__item').forEach(el => el.classList.add('tilt'));
 
 /* 3D egilish (tilt) */
@@ -328,33 +335,6 @@ certEls.forEach((el, i) => {
 $('.certs__nav').addEventListener('click', e => { const b = e.target.closest('[data-go]'); if (b) goCert(+b.dataset.go); });
 
 /* =========================================================
-   Terminal
-   ========================================================= */
-const TERM = [
-  ['$ ', 'whoami', 'Dovudbek Khusanov — KRYSEC asoschisi'],
-  ['$ ', 'cat experience.txt', '<span class="o">3+</span> yil amaliy kiberxavfsizlik tajribasi'],
-  ['$ ', 'cat certifications.txt', CERTS.map(c => `<span class="p">[✓]</span> ${c.issuer.padEnd(13)} ${c.code}`).join('\n')],
-  ['$ ', 'nmap -sV lab.krysec.local', '<span class="c">22/tcp</span>  open  ssh     OpenSSH 8.9\n<span class="c">80/tcp</span>  open  http    nginx 1.24\n<span class="c">445/tcp</span> open  smb     Samba 4.15'],
-  ['$ ', './yangi_guruh --status', '<span class="o">[+]</span> Yozilish ochiq. Joylar cheklangan.'],
-];
-let typed = false;
-async function typeTerminal() {
-  if (typed) return; typed = true;
-  const pre = $('#term');
-  let html = '';
-  for (const [p, cmd, out] of TERM) {
-    for (let i = 0; i <= cmd.length; i++) {
-      pre.innerHTML = `${html}<span class="p">${p}</span>${cmd.slice(0, i)}<span class="cursor"></span>`;
-      await new Promise(r => setTimeout(r, REDUCED ? 0 : 28 + Math.random() * 40));
-    }
-    html += `<span class="p">${p}</span>${cmd}\n${out}\n`;
-    pre.innerHTML = html + '<span class="cursor"></span>';
-    await new Promise(r => setTimeout(r, REDUCED ? 0 : 420));
-  }
-  pre.innerHTML = `${html}<span class="p">$ </span><span class="cursor"></span>`;
-}
-
-/* =========================================================
    Yozilish formasi
    ========================================================= */
 const enroll = initEnroll({ scene });
@@ -362,22 +342,18 @@ const enroll = initEnroll({ scene });
 /* =========================================================
    Yuklanish
    ========================================================= */
+// sahifa har doim boshidan ochilsin (telefon brauzerlari oxirgi joyni eslab qoladi)
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+scrollTo(0, 0);
+addEventListener('pageshow', e => { if (e.persisted) scrollTo(0, 0); });
+
 let started = false;
 function ready() {
   if (started) return; started = true;
   body.classList.remove('is-loading');
   requestAnimationFrame(() => body.classList.add('is-ready'));
   for (let i = 0; i < 8; i++) setTimeout(() => scene.launch(), i * 120);
-  // sanoqlar
-  $$('[data-count]').forEach(el => {
-    const to = +el.dataset.count, t0 = performance.now();
-    const step = now => {
-      const p = Math.min((now - t0) / 1400, 1);
-      el.textContent = Math.round(to * (1 - Math.pow(1 - p, 3)));
-      if (p < 1) requestAnimationFrame(step);
-    };
-    setTimeout(() => requestAnimationFrame(step), 700);
-  });
 }
 canvas.addEventListener('ready', ready, { once: true });
 setTimeout(ready, 6000);
@@ -385,31 +361,6 @@ scene.setPreset(presetFor('top'));
 layoutRoad();
 onScroll();
 scene.start();
-
-/* =========================================================
-   Ilmoq matni (hook) — terminalda yozilib-o'chiriladi
-   ========================================================= */
-const HOOKS = [
-  'sovuqqon haker bo‘lmoqchimisan?',
-  'parolingni 3 soniyada buzishadi. sen-chi?',
-  'birinchi root — shu yerda.',
-  'hujumchi kabi o‘yla. himoyachi kabi harakat qil.',
-  'xakerlar kutmaydi. sen ham kutma.',
-];
-(async function hookLoop() {
-  const el = $('#hook');
-  if (!el) return;
-  if (REDUCED) { el.textContent = HOOKS[0]; return; }
-  const sleep = ms => new Promise(r => setTimeout(r, ms));
-  await sleep(1400);
-  for (let i = 0; ; i = (i + 1) % HOOKS.length) {
-    const t = HOOKS[i];
-    for (let k = 1; k <= t.length; k++) { el.textContent = t.slice(0, k); await sleep(38 + Math.random() * 50); }
-    await sleep(2600);
-    for (let k = t.length; k >= 0; k--) { el.textContent = t.slice(0, k); await sleep(16); }
-    await sleep(350);
-  }
-})();
 
 /* =========================================================
    Mobil menyu

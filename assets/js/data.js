@@ -70,8 +70,10 @@ export const TICKER = [
    ========================================================= */
 export const CONFIG = {
   brand: 'KRYSEC',
-  telegram: '@KrySec_bot',
-  telegramUrl: 'https://t.me/KrySec_bot',
+  telegram: '@Krysec',
+  telegramUrl: 'https://t.me/Krysec',
+  instagram: 'krysec.uz',
+  instagramUrl: 'https://www.instagram.com/krysec.uz/',
   phone: '+998 94 035 51 35',
   address: '',                       // manzil berilsa — saytda avtomatik chiqadi
   landmark: '',
