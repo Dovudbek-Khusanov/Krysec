@@ -39,7 +39,7 @@ module.exports = async (req, res) => {
   }
 
   const text = [
-    '🆕 Yangi ariza — CRYSEC',
+    '🆕 Yangi ariza — KRYSEC',
     '',
     `👤 ${d.name}`,
     `📞 ${d.phone}`,

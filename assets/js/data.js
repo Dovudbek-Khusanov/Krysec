@@ -62,23 +62,20 @@ export const TICKER = [
   'Markaziy Osiyo bank sektoriga fishing to‘lqini: +312% haftalik',
   'Ransomware guruhi LockSpire infratuzilmasi bloklandi',
   'DNS amplification hujumlari 1.8 Tbit/s cho‘qqisiga yetdi',
-  'CRYSEC CTF: yangi haftalik topshiriqlar e’lon qilindi',
+  'KRYSEC CTF: yangi haftalik topshiriqlar e’lon qilindi',
 ];
 
 /* =========================================================
-   CRYSEC — markaz ma'lumotlari. Kontaktlarni shu yerda o'zgartiring.
+   KRYSEC — markaz ma'lumotlari. Kontaktlarni shu yerda o'zgartiring.
    ========================================================= */
 export const CONFIG = {
-  brand: 'CRYSEC',
-  telegram: '@crysec_uz',            // TODO: haqiqiy Telegram kanal/admin
-  telegramUrl: 'https://t.me/crysec_uz',
-  phone: '+998 (__) ___-__-__',      // TODO: telefon raqam
-  address: 'Manzil kiritilmagan',    // TODO: markaz manzili
-  landmark: '',                      // TODO: mo'ljal
-  enrollEndpoint: '/api/enroll',   // Vercel funksiyasi -> Telegram bot (api/enroll.js)
-  // Talabalar kabineti API si. Bo'sh bo'lsa — login sahifasi namoyish rejimida ishlaydi.
-  loginEndpoint: '',
-  loginRedirect: '',               // muvaffaqiyatli kirishdan keyin o'tiladigan sahifa
+  brand: 'KRYSEC',
+  telegram: '@KrySec_bot',
+  telegramUrl: 'https://t.me/KrySec_bot',
+  phone: '+998 94 035 51 35',
+  address: '',                       // manzil berilsa — saytda avtomatik chiqadi
+  landmark: '',
+  enrollEndpoint: '/api/enroll',     // Vercel funksiyasi -> Telegram bot (api/enroll.js)
 };
 
 export const CATEGORIES = [

@@ -1,5 +1,5 @@
 import { scramble, wait } from './fx.js';
-import { COURSES, CONFIG } from './data.js';
+import { CONFIG } from './data.js';
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -43,7 +43,7 @@ export function initEnroll({ scene }) {
     const t = $(`.face[data-step="${n}"] .enroll__title`, form);
     scramble(t, t.dataset.text || (t.dataset.text = t.textContent), { duration: 900 });
     setTimeout(() => {
-      const first = $(`.face[data-step="${n}"] input:not([type=hidden]):not([type=radio]), .face[data-step="${n}"] .select__btn`, form);
+      const first = $(`.face[data-step="${n}"] input:not([type=hidden]):not([type=radio])`, form);
       if (matchMedia('(hover: hover)').matches) first?.focus({ preventScroll: true });
     }, 650);
   }
@@ -87,53 +87,12 @@ export function initEnroll({ scene }) {
     if (e.key === 'Enter') { e.preventDefault(); if (validateStep1()) go(2); }
   });
 
-  /* ---------- kurs tanlash (maxsus select) ---------- */
-  const sel = $('#courseSelect');
-  const btn = $('.select__btn', sel);
-  const list = $('.select__list', sel);
-  const hidden = form.elements.namedItem('course');
-  list.innerHTML = COURSES.map(c => `<li role="option" data-id="${c.id}" aria-selected="false">${c.title}<small>${String(COURSES.indexOf(c) + 1).padStart(2, '0')}</small></li>`).join('');
-  const opts = $$('li', list);
-  let active = -1;
-  const open = v => {
-    sel.classList.toggle('is-open', v);
-    btn.setAttribute('aria-expanded', v);
-    if (v) { active = Math.max(opts.findIndex(o => o.dataset.id === hidden.value), 0); mark(); }
-  };
-  const mark = () => {
-    opts.forEach((o, i) => o.classList.toggle('is-active', i === active));
-    opts[active]?.scrollIntoView({ block: 'nearest' });
-  };
-  function pick(id) {
-    const c = COURSES.find(k => k.id === id);
-    if (!c) return;
-    hidden.value = c.title;
-    $('.select__val', sel).textContent = c.title;
-    sel.classList.add('has-val');
-    opts.forEach(o => o.setAttribute('aria-selected', o.dataset.id === id));
-    setErr(btn, '');
-  }
-  btn.addEventListener('click', () => open(!sel.classList.contains('is-open')));
-  list.addEventListener('click', e => { const li = e.target.closest('li'); if (li) { pick(li.dataset.id); open(false); btn.focus(); } });
-  btn.addEventListener('keydown', e => {
-    const isOpen = sel.classList.contains('is-open');
-    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-      e.preventDefault();
-      if (!isOpen) return open(true);
-      active = (active + (e.key === 'ArrowDown' ? 1 : -1) + opts.length) % opts.length; mark();
-    } else if ((e.key === 'Enter' || e.key === ' ') && isOpen) {
-      e.preventDefault(); pick(opts[active].dataset.id); open(false);
-    } else if (e.key === 'Escape') open(false);
-  });
-  document.addEventListener('click', e => { if (!sel.contains(e.target)) open(false); });
-
   /* ---------- yuborish ---------- */
   let busy = false;
   form.addEventListener('submit', async e => {
     e.preventDefault();
     if (busy) return;
     if (step === 1) { if (validateStep1()) go(2); return; }
-    if (!hidden.value) { setErr(btn, 'Kursni tanlang'); return; }
     formErr.textContent = '';
     busy = true;
     const submit = $('.submit', form);
@@ -166,7 +125,7 @@ export function initEnroll({ scene }) {
     card.classList.add('is-done');
     await wait(700);
 
-    const steps = ['Ariza shifrlandi', 'CRYSEC administratoriga yuborildi', 'Laboratoriya kaliti tayyorlanmoqda'];
+    const steps = ['Ariza shifrlandi', 'KRYSEC administratoriga yuborildi', 'Laboratoriya kaliti tayyorlanmoqda'];
     for (let i = 0; i < steps.length; i++) {
       const li = document.createElement('li');
       li.innerHTML = `<span>› ${steps[i]}…</span><b class="wait">···</b>`;
@@ -178,7 +137,7 @@ export function initEnroll({ scene }) {
     done.classList.add('is-ok');
     const first = data.name.trim().split(/\s+/)[0];
     await scramble($('#doneTitle'), `Rahmat, ${first}!`, { duration: 900 });
-    $('#doneSub').textContent = `“${data.course}” kursiga arizangiz qabul qilindi. Administrator tez orada ${data.phone} raqamiga bog‘lanadi.`;
+    $('#doneSub').textContent = `“${data.course}” kursiga (${data.time}) arizangiz qabul qilindi. Tez orada ${data.phone} raqamiga bog‘lanamiz.`;
     submit.classList.remove('is-busy');
     busy = false;
   });
@@ -186,12 +145,10 @@ export function initEnroll({ scene }) {
   $('#doneAgain').addEventListener('click', () => {
     card.classList.remove('is-done'); done.classList.remove('is-ok');
     form.reset();
-    sel.classList.remove('has-val'); $('.select__val', sel).textContent = 'Kursni tanlang'; hidden.value = '';
     $$('.field', form).forEach(f => f.classList.remove('is-ok', 'is-error'));
     go(1);
   });
 
   return {
-    pickCourse(id) { pick(id); if (step === 2) return; },
   };
 }

@@ -54,7 +54,7 @@ filters.addEventListener('click', e => {
 
 const bandWords = COURSES.map(c => `<span>${c.title}</span>`).join('');
 $('#band1').innerHTML = bandWords + bandWords;
-$('#band2').innerHTML = ['Buz', 'O‘rgan', 'Himoyala', 'CTF', 'Red team', 'Blue team', 'Lab', 'CRYSEC'].map(w => `<span>${w}</span>`).join('').repeat(4);
+$('#band2').innerHTML = ['Exploit', 'Analyze', 'Defend', 'CTF', 'Red team', 'OSINT', 'Lab', 'KRYSEC'].map(w => `<span>${w}</span>`).join('').repeat(4);
 
 $('#certs').innerHTML = CERTS.map((c, i) => `
   <article class="cert" data-i="${i}" style="--h:${c.hue}" tabindex="0" aria-label="${c.code} — ${c.name}">
@@ -62,7 +62,7 @@ $('#certs').innerHTML = CERTS.map((c, i) => `
       <p class="cert__issuer"><span>${c.issuer}</span><span>${pad(i + 1)}/${pad(CERTS.length)}</span></p>
       <svg class="cert__seal" viewBox="0 0 64 64" aria-hidden="true">
         <defs><path id="sealp${i}" d="M32 32m-24 0a24 24 0 1 1 48 0a24 24 0 1 1-48 0"/></defs>
-        <g><text><textPath href="#sealp${i}">CERTIFIED · CRYSEC MENTOR · CERTIFIED ·</textPath></text></g>
+        <g><text><textPath href="#sealp${i}">CERTIFIED · KRYSEC MENTOR · CERTIFIED ·</textPath></text></g>
         <circle cx="32" cy="32" r="17"/><path d="m25 32 5 5 9-10"/>
       </svg>
       <div class="cert__code">${c.code}</div>
@@ -78,15 +78,19 @@ $('#certs').innerHTML = CERTS.map((c, i) => `
 $$('.cert__img').forEach(box => {
   const img = new Image();
   img.alt = 'Sertifikat';
-  img.onload = () => { box.innerHTML = ''; box.append(img); box.classList.add('has-img'); };
+  img.onload = () => {
+    box.innerHTML = ''; box.append(img); box.classList.add('has-img');
+    box.insertAdjacentHTML('beforeend', '<span class="cert__zoom mono">⤢ kattalashtirish</span>');
+  };
   img.src = box.dataset.src;
 });
 
 const contactHTML = () => `
   <li><a href="${CONFIG.telegramUrl}" target="_blank" rel="noopener"><svg><use href="#i-tg"/></svg><span>${CONFIG.telegram}<small>Telegram</small></span></a></li>
   <li><a href="tel:${CONFIG.phone.replace(/[^\d+]/g, '')}"><svg><use href="#i-call"/></svg><span>${CONFIG.phone}<small>Qo‘ng‘iroq qiling</small></span></a></li>
-  <li><span><svg><use href="#i-pin"/></svg><span>${CONFIG.address}${CONFIG.landmark ? `<small>Mo‘ljal: ${CONFIG.landmark}</small>` : '<small>Manzil</small>'}</span></span></li>`;
+  ${CONFIG.address ? `<li><span><svg><use href="#i-pin"/></svg><span>${CONFIG.address}${CONFIG.landmark ? `<small>Mo‘ljal: ${CONFIG.landmark}</small>` : '<small>Manzil</small>'}</span></span></li>` : ''}`;
 $('#contactsFoot').innerHTML = contactHTML();
+$('#contactsMenu').innerHTML = contactHTML();
 $('#year').textContent = new Date().getFullYear();
 
 /* so'zma-so'z sarlavhalar */
@@ -115,7 +119,7 @@ function onAttack(arc) {
   if (arc.to.name === HOME.name) li.classList.add('is-home');
   li.innerHTML = `<i class="sw"></i><span class="route">${arc.from.name}<b>→</b>${arc.to.name}</span>
     <span class="val">${arc.blocked ? 'BLOKLANDI' : valueFor(arc.type)}</span>
-    <span class="meta">${time()} · ${arc.blocked ? 'CRYSEC qalqoni' : arc.type.label}</span>`;
+    <span class="meta">${time()} · ${arc.blocked ? 'KRYSEC qalqoni' : arc.type.label}</span>`;
   feed.prepend(li);
   while (feed.children.length > 8) feed.lastElementChild.remove();
 }
@@ -143,26 +147,24 @@ setInterval(() => {
 }, 1000);
 
 /* har bir bo'lim uchun globus "kadri" */
+// globus faqat bosh qismda; keyingi bo'limlarda pastga "cho'kib" ketadi, fon qoladi
 const PRESETS = {
   desktop: {
     top: { shift: .17, r: .36, rw: .22 },
-    about: { shift: -.3, r: .28, rw: .17, aux: .1 },
-    courses: { shift: 0, r: .62, rw: .5, vy: -.64, aux: .2 },
-    roadmap: { shift: .36, r: .16, rw: .1, vy: .26, aux: .4 },
-    mentor: { shift: .2, r: .55, rw: .4, vy: -.82, aux: .55 },
-    register: { shift: -.24, r: .32, rw: .2, aux: .85 },
+    away: { shift: .17, r: .36, rw: .22, vy: -1.7 },
   },
   mobile: {
     top: { r: .3, rw: .43, vy: .2 },
-    about: { r: .6, rw: .9, vy: -.62, aux: .1 },
-    courses: { r: .6, rw: .9, vy: -.62, aux: .2 },
-    roadmap: { shift: .3, r: .2, rw: .2, vy: .34, aux: .4 },
-    mentor: { r: .6, rw: .8, vy: -.6, aux: .55 },
-    register: { r: .2, rw: .3, vy: .3, aux: .85 },
+    away: { r: .3, rw: .43, vy: -1.4 },
   },
 };
+const AUX = { top: 0, about: .1, courses: .2, roadmap: .4, mentor: .55, register: .85 };
+const BASE_RATE = scene.rate;
 const sections = $$('[data-globe]');
-function presetFor(id) { return PRESETS[innerWidth < 900 ? 'mobile' : 'desktop'][id] || PRESETS.desktop.top; }
+function presetFor(id) {
+  const set = PRESETS[innerWidth < 900 ? 'mobile' : 'desktop'];
+  return { ...(id === 'top' ? set.top : set.away), aux: AUX[id] ?? 0 };
+}
 
 function onScroll() {
   const h = innerHeight, y = scrollY;
@@ -175,7 +177,8 @@ function onScroll() {
   const id = cur.id;
   if (id !== activeSec) {
     activeSec = id;
-    scene.setPreset(presetFor(cur.dataset.globe === 'hero' ? 'top' : id));
+    scene.setPreset(presetFor(id));
+    scene.rate = id === 'top' ? BASE_RATE : 0;
     $$('[data-nav]').forEach(a => a.classList.toggle('is-active', a.dataset.nav === id));
     $$('[data-dot]').forEach(a => a.classList.toggle('is-on', a.dataset.dot === id));
     if (id !== 'top') tag.classList.remove('is-on');
@@ -328,9 +331,10 @@ $('.certs__nav').addEventListener('click', e => { const b = e.target.closest('[d
    Terminal
    ========================================================= */
 const TERM = [
-  ['$ ', 'whoami', 'Dovudbek Khusanov — CRYSEC asoschisi'],
+  ['$ ', 'whoami', 'Dovudbek Khusanov — KRYSEC asoschisi'],
+  ['$ ', 'cat experience.txt', '<span class="o">3+</span> yil amaliy kiberxavfsizlik tajribasi'],
   ['$ ', 'cat certifications.txt', CERTS.map(c => `<span class="p">[✓]</span> ${c.issuer.padEnd(13)} ${c.code}`).join('\n')],
-  ['$ ', 'nmap -sV lab.crysec.local', '<span class="c">22/tcp</span>  open  ssh     OpenSSH 8.9\n<span class="c">80/tcp</span>  open  http    nginx 1.24\n<span class="c">445/tcp</span> open  smb     Samba 4.15'],
+  ['$ ', 'nmap -sV lab.krysec.local', '<span class="c">22/tcp</span>  open  ssh     OpenSSH 8.9\n<span class="c">80/tcp</span>  open  http    nginx 1.24\n<span class="c">445/tcp</span> open  smb     Samba 4.15'],
   ['$ ', './yangi_guruh --status', '<span class="o">[+]</span> Yozilish ochiq. Joylar cheklangan.'],
 ];
 let typed = false;
@@ -354,7 +358,6 @@ async function typeTerminal() {
    Yozilish formasi
    ========================================================= */
 const enroll = initEnroll({ scene });
-$$('[data-course]').forEach(a => a.addEventListener('click', () => enroll.pickCourse(a.dataset.course)));
 
 /* =========================================================
    Yuklanish
@@ -382,3 +385,54 @@ scene.setPreset(presetFor('top'));
 layoutRoad();
 onScroll();
 scene.start();
+
+/* =========================================================
+   Ilmoq matni (hook) — terminalda yozilib-o'chiriladi
+   ========================================================= */
+const HOOKS = [
+  'sovuqqon haker bo‘lmoqchimisan?',
+  'parolingni 3 soniyada buzishadi. sen-chi?',
+  'birinchi root — shu yerda.',
+  'hujumchi kabi o‘yla. himoyachi kabi harakat qil.',
+  'xakerlar kutmaydi. sen ham kutma.',
+];
+(async function hookLoop() {
+  const el = $('#hook');
+  if (!el) return;
+  if (REDUCED) { el.textContent = HOOKS[0]; return; }
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  await sleep(1400);
+  for (let i = 0; ; i = (i + 1) % HOOKS.length) {
+    const t = HOOKS[i];
+    for (let k = 1; k <= t.length; k++) { el.textContent = t.slice(0, k); await sleep(38 + Math.random() * 50); }
+    await sleep(2600);
+    for (let k = t.length; k >= 0; k--) { el.textContent = t.slice(0, k); await sleep(16); }
+    await sleep(350);
+  }
+})();
+
+/* =========================================================
+   Mobil menyu
+   ========================================================= */
+const burger = $('#burger'), mmenu = $('#mmenu');
+function toggleMenu(open = !body.classList.contains('menu-open')) {
+  body.classList.toggle('menu-open', open);
+  burger.setAttribute('aria-expanded', open);
+}
+burger.addEventListener('click', () => toggleMenu());
+mmenu.addEventListener('click', e => { if (e.target.closest('a')) toggleMenu(false); });
+addEventListener('keydown', e => { if (e.key === 'Escape') { toggleMenu(false); closeLightbox(); } });
+
+/* =========================================================
+   Sertifikatni kattalashtirish
+   ========================================================= */
+const lb = $('#lightbox');
+function closeLightbox() { lb.classList.remove('is-open'); }
+$('#certs').addEventListener('click', e => {
+  const img = e.target.closest('.cert.is-front .cert__img.has-img');
+  if (!img) return;
+  e.stopPropagation();
+  $('img', lb).src = img.querySelector('img').src;
+  lb.classList.add('is-open');
+}, true);
+lb.addEventListener('click', closeLightbox);
