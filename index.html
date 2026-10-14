@@ -12,7 +12,7 @@
   <link rel="apple-touch-icon" href="assets/brand/logo.jpg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Caveat:wght@600&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="modulepreload" href="assets/vendor/three.module.min.js">
 </head>
@@ -237,28 +237,42 @@
           <figure class="profile card tilt no-drag z3" id="profile">
             <div class="profile__bg" aria-hidden="true">
               <i class="profile__aurora"></i>
-              <i class="profile__ring r1"></i><i class="profile__ring r2"></i><i class="profile__ring r3"></i>
               <i class="profile__grid"></i>
+              <span class="profile__brand"><img src="assets/brand/mark.png" alt=""><b>KRYSEC</b></span>
+              <i class="profile__ring r1"></i><i class="profile__ring r2"></i>
               <i class="profile__scan"></i>
             </div>
             <div class="profile__mono" aria-hidden="true">DK</div>
             <img class="profile__img" src="assets/mentor/dovudbek.webp" alt="Dovudbek Khusanov" onerror="this.remove()">
+            <span class="profile__sign" aria-hidden="true">Krysec asoschisi</span>
             <span class="profile__chip c1 mono">CPTS</span>
             <span class="profile__chip c2 mono">eJPT</span>
             <span class="profile__chip c3 mono">CJCA</span>
             <span class="profile__xp"><b>3+</b><small>yil<br>tajriba</small></span>
             <figcaption class="profile__plate">
-              <b>Dovudbek Khusanov</b>
-              <span class="mono">Asoschi · Bosh mentor</span>
+              <span class="mono profile__role">Founder &amp; Lead Mentor — KRYSEC</span>
+              <span class="profile__tags">
+                <i><svg><use href="#i-shield"/></svg>Cybersecurity</i>
+                <i><svg viewBox="0 0 24 24"><path d="m8 7-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></svg>Ethical Hacking</i>
+                <i><svg><use href="#i-net"/></svg>Networking</i>
+              </span>
             </figcaption>
           </figure>
         </div>
         <div class="mentor__right">
-          <h2 class="h2 z3" data-split>Sizni xalqaro sertifikatli mutaxassis o‘qitadi.</h2>
-          <p class="lead z3"><b>Dovudbek Khusanov</b> — KRYSEC asoschisi va bosh mentori, kiberxavfsizlikda <b>3+ yillik</b> amaliy tajriba. Uning sertifikatlari test emas,
-            soatlab davom etadigan <b>amaliy</b> imtihonlar. Ularni topshirish uchun nima kerakligini o‘z tajribasidan biladi
-            va sizga ham shu yo‘lni o‘rgatadi.</p>
+          <h2 class="mname z3"><span>Dovudbek</span> <span class="grad">Khusanov</span></h2>
+          <p class="mrole mono z3">Asoschi <i>/</i> Ustoz <i>/</i> KRYSEC</p>
+          <blockquote class="mquote z3">“Bilim — bu faqat kasb emas, bu erkinlikdir.”</blockquote>
+          <p class="lead z3">KRYSEC asoschisi va bosh mentori. Kiberxavfsizlik sohasida <b>3+ yillik</b> amaliy tajribaga ega,
+            bilimini xalqaro <b>amaliy</b> sertifikatlar bilan tasdiqlagan. Hozirda yangi avlod mutaxassislarini tayyorlash bilan shug‘ullanadi.</p>
+          <ul class="mskills z3">
+            <li><svg><use href="#i-shield"/></svg><span>Axborot xavfsizligi<small>Cybersecurity &amp; Pentesting</small></span></li>
+            <li><svg viewBox="0 0 24 24"><path d="m8 7-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></svg><span>IT va dasturlash<small>Python, Web, OS</small></span></li>
+            <li><svg><use href="#i-net"/></svg><span>Tarmoq va tizimlar<small>Networking &amp; Systems</small></span></li>
+            <li><svg viewBox="0 0 24 24"><path d="M2 9 12 4l10 5-10 5z"/><path d="M6 11v5c3 2 9 2 12 0v-5M22 9v6"/></svg><span>Mentorlik<small>Real lablar, CTF, amaliyot</small></span></li>
+          </ul>
           <div class="certs" id="certs"></div>
+          <p class="mtag mono z3">KRYSEC <i>—</i> Bilim <i>•</i> Amaliyot <i>•</i> Kelajak</p>
         </div>
       </div>
     </section>
